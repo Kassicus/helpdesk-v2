@@ -3,14 +3,31 @@ import pygame
 pygame.init()
 pygame.font.init()
 
-BLACK = (0, 0, 0)
+BLACK = (45, 45, 45)
 WHITE = (255, 255, 255)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 
-interfont = pygame.font.Font("assets/fonts/Inter/Inter-Medium.ttf", 28)
 statfont = pygame.font.Font("assets/fonts/Inter/Inter-Medium.ttf", 18)
+
+class PreviousDay():
+    def __init__(self, x, y, percentage):
+        self.x = x
+        self.y = y
+
+        self.width = 25
+        self.height = 75
+
+        self.percentage = percentage
+
+    def draw(self, surface):
+        pygame.draw.rect(surface, BLUE, (self.x, self.y, self.width, self.height))
+        pygame.draw.rect(surface, GREEN, (self.x, self.y + self.height - int(self.percentage * .75) + 1, self.width, int(self.percentage * .75) + 1))
+        pygame.draw.rect(surface, WHITE, (self.x - 2, self.y + self.height - int(self.percentage * .75) + 1, 29, 3))
+
+    def update(self, events):
+        pass
 
 class SaveButton():
     def __init__(self, x, y):
@@ -121,6 +138,12 @@ class Window():
         self.averagestat = statfont.render("Average Non Helpdesk: 60%", True, WHITE)
         self.diffstat = statfont.render("Difference: " + str(int(self.percentNonHelpdesk - 60)) + "%", True, WHITE)
 
+        self.monday = PreviousDay(25, 400, 30)
+        self.tuesday = PreviousDay(75, 400, 57)
+        self.wednesday = PreviousDay(125, 400, 69)
+        self.thursday = PreviousDay(175, 400, 42)
+        self.friday = PreviousDay(225, 400, 77)
+
     def start(self):
         while self.running:
             self.events = pygame.event.get()
@@ -150,6 +173,12 @@ class Window():
         self.screen.blit(self.averagestat, (25, 320))
         self.screen.blit(self.diffstat, (25, 345))
 
+        self.monday.draw(self.screen)
+        self.tuesday.draw(self.screen)
+        self.wednesday.draw(self.screen)
+        self.thursday.draw(self.screen)
+        self.friday.draw(self.screen)
+
     def update(self):
         try:
             self.percentNonHelpdesk = int((self.inpersonTickets/(self.helpdeskTickets + self.inpersonTickets)) * 100)
@@ -168,6 +197,12 @@ class Window():
         self.totalstat = statfont.render("Total Tickets: " + str(int(self.helpdeskTickets + self.inpersonTickets)), True, WHITE)
         self.percentstat = statfont.render("Percent Non Helpdesk: " + str(round(self.percentNonHelpdesk)) + "%", True, WHITE)
         self.diffstat = statfont.render("Difference: " + str(int(self.percentNonHelpdesk - 60)) + "%", True, WHITE)
+
+        self.monday.update(self.events)
+        self.tuesday.update(self.events)
+        self.wednesday.update(self.events)
+        self.thursday.update(self.events)
+        self.friday.update(self.events)
 
         pygame.display.update()
         self.clock.tick(30)

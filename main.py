@@ -1,4 +1,5 @@
 import pygame
+import pickle
 
 pygame.init()
 pygame.font.init()
@@ -8,8 +9,10 @@ WHITE = (255, 255, 255)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
+PURPLE = (255, 0, 255)
 
 statfont = pygame.font.Font("assets/fonts/Inter/Inter-Medium.ttf", 18)
+
 
 class PreviousDay():
     def __init__(self, x, y, percentage):
@@ -29,6 +32,39 @@ class PreviousDay():
     def update(self, events):
         pass
 
+
+class LoadButton():
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+        self.width = 100
+        self.height = 35
+
+    def draw(self, surface):
+        pygame.draw.rect(surface, PURPLE, (self.x, self.y, self.width, self.height))
+
+    def update(self, events):
+        pos = pygame.mouse.get_pos()
+
+        if self.x <= pos[0] <= self.x + self.width:
+            if self.y <= pos[1] <= self.y + self.height:
+                for event in events:
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        self.load()
+
+    def load(self):
+        try:
+            window.helpdeskTickets = pickle.load(open("assets/save/helpdeskTickets.p", "rb"))
+        except:
+            print("assets/save/helpdeskTickets.p not found")
+
+        try:
+            window.inpersonTickets = pickle.load(open("assets/save/inpersonTickets.p", "rb"))
+        except:
+            print("assets/save/inpersonTickets.p not found")
+
+
 class SaveButton():
     def __init__(self, x, y):
         self.x = x
@@ -47,7 +83,11 @@ class SaveButton():
             if self.y <= pos[1] <= self.y + self.height:
                 for event in events:
                     if event.type == pygame.MOUSEBUTTONDOWN:
-                        pass
+                        self.save()
+
+    def save(self):
+        pickle.dump(window.helpdeskTickets, open("assets/save/helpdeskTickets.p", "wb"))
+        pickle.dump(window.inpersonTickets, open("assets/save/inpersonTickets.p", "wb"))
 
 
 class IncrementTicketButton():
@@ -124,6 +164,7 @@ class Window():
         self.helpdeskButton = IncrementTicketButton(150, 85, "helpdesk", "HD")
         self.inpersonButton = IncrementTicketButton(25, 85, "inperson", "IP")
         self.saveButton = SaveButton(375, 85)
+        self.loadButton = LoadButton(275, 85)
 
         try:
             self.percentNonHelpdesk = int((self.inpersonTickets/(self.helpdeskTickets + self.inpersonTickets)) * 100)
@@ -164,6 +205,7 @@ class Window():
         self.helpdeskButton.draw(self.screen)
         self.inpersonButton.draw(self.screen)
         self.saveButton.draw(self.screen)
+        self.loadButton.draw(self.screen)
 
         self.screen.blit(self.statstitle, (25, 145))
         self.screen.blit(self.helpdeskstat, (25, 195))
@@ -191,6 +233,7 @@ class Window():
         self.helpdeskButton.update(self.events)
         self.inpersonButton.update(self.events)
         self.saveButton.update(self.events)
+        self.loadButton.update(self.events)
 
         self.helpdeskstat = statfont.render("Helpdesk Tickets: " + str(self.helpdeskTickets), True, WHITE)
         self.inpersonstat = statfont.render("Inperson Tickets: " + str(self.inpersonTickets), True, WHITE)
